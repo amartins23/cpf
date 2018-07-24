@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.ctools.cpf.repository.bundle.IBundleReadAccess;
 import org.pentaho.ctools.cpf.repository.utils.*;
 import pt.webdetails.cpf.api.IContentAccessFactoryExtended;
 import pt.webdetails.cpf.api.IUserContentAccessExtended;
@@ -44,7 +45,7 @@ import pt.webdetails.cpf.repository.api.IRWAccess;
  *
  * @see IContentAccessFactoryExtended
  * @see IUserContentAccessExtended
- * @see IReadAccess
+ * @see IBundleReadAccess
  * @see IRWAccess
  */
 public final class ContentAccessFactory implements IContentAccessFactoryExtended {
@@ -52,6 +53,7 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
   private static final String PLUGIN_REPOS_NAMESPACE = "repos";
   private static final String PLUGIN_SYSTEM_NAMESPACE = "system";
   private List<IReadAccess> readAccesses = new ArrayList<>();
+  private List<IReadAccess> userContentReadAccesses = new ArrayList<>();
   private IUserContentAccessExtended userContentAccess = null;
   private final String volumePath;
   private final String parentPluginId;
@@ -62,6 +64,22 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
   }
   public void removeReadAccess( IReadAccess readAccess ) {
     this.readAccesses.remove( readAccess );
+  }
+
+  public void addReadAccess( IBundleReadAccess readAccess ) {
+    if ( readAccess.isUserContent() ) {
+      this.userContentReadAccesses.add( readAccess );
+    } else {
+      this.readAccesses.add( readAccess );
+    }
+  }
+  public void removeReadAccess( IBundleReadAccess readAccess ) {
+    if ( readAccess == null ) return;
+    if ( readAccess.isUserContent() ) {
+      this.userContentReadAccesses.remove( readAccess );
+    } else {
+      this.readAccesses.remove( readAccess );
+    }
   }
 
   public void setUserContentAccess( IUserContentAccessExtended userContentAccess ) {
@@ -77,15 +95,18 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
     this.parentPluginId = parentPluginId;
   }
 
-  public ContentAccessFactory(String volumePath, String parentPluginId) {
+  public ContentAccessFactory( String volumePath, String parentPluginId ) {
     this.volumePath = volumePath;
     this.parentPluginId = parentPluginId;
   }
 
   @Override
-  public IUserContentAccessExtended getUserContentAccess( String path ) {
-    //TODO: allow overlays of UCAs
-    return userContentAccess;
+  public IUserContentAccessExtended getUserContentAccess( String basePath ) {
+    if ( userContentReadAccesses.isEmpty() ) {
+      return userContentAccess;
+    } else {
+      return new OverlayUserContentAccess( basePath, userContentAccess, userContentReadAccesses );
+    }
   }
 
   @Override
