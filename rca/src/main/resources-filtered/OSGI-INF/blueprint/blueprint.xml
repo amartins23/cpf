@@ -13,7 +13,7 @@
         <argument value="${repos.user}"/>
         <argument value="${repos.password}"/>
     </bean>
-    <service interface="pt.webdetails.cpf.repository.api.IUserContentAccessExtended" ref="remoteUserContentAccess"/>
+    <service interface="pt.webdetails.cpf.api.IUserContentAccessExtended" ref="remoteUserContentAccess"/>
 
     <!--
   <bean id="remoteReadAccess" class="org.pentaho.ctools.cpf.repository.rca.RemoteReadAccess">
