@@ -109,7 +109,7 @@ public abstract class OverlayAccess<T extends IRWAccess> implements IRWAccess {
     };
   }
 
-  private IBasicFileExt obtainReadAccess( String path ) {
+  protected IBasicFileExt obtainReadAccess( String path ) {
     String fullPath = buildPath( path );
     IBasicFile basicFile;
 
@@ -215,6 +215,10 @@ public abstract class OverlayAccess<T extends IRWAccess> implements IRWAccess {
     try {
       // we may be copying across layers
       InputStream sourceContents = getFileInputStream( pathFrom );
+      if ( sourceContents == null ) {
+        logger.error( "copy failed: could not read input file: " + pathFrom );
+        return false;
+      }
       String fullPathTo = buildPath( pathTo );
       return writeAccess.saveFile( fullPathTo, sourceContents );
     } catch ( IOException ex ) {

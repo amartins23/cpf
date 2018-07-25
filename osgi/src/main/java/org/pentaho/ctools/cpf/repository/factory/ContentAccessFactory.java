@@ -133,13 +133,13 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
 
   @Override
   public IReadAccess getOtherPluginSystemReader( String pluginId, String basePath ) {
-    logger.info( "RO FileSystemOverlay for <" + pluginId + ">: " + basePath );
+    logger.info( ( pluginId.equals( parentPluginId ) ? "[SELF]" : "[OTHER]" ) + " RO FileSystemOverlay for <" + pluginId + ">: " + basePath );
     return getPluginSystemOverlay( pluginId, basePath );
   }
 
   @Override
   public IRWAccess getOtherPluginSystemWriter( String pluginId, String basePath ) {
-    logger.info( "RW FileSystemOverlay for <" + pluginId + ">: " + basePath );
+    logger.info( ( pluginId.equals( parentPluginId ) ? "[SELF]" : "[OTHER]" ) + " RO FileSystemOverlay for <" + pluginId + ">: " + basePath );
     return getPluginSystemOverlay( pluginId, basePath );
   }
 
