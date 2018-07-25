@@ -39,9 +39,9 @@ public class FileSystemRWAccess extends FileBasedResourceAccess {
 
   @Override
   protected File getFile( String path ) {
-    Path filePath = ( path == null ?
-        this.fileSystem.getPath( this.volumePath, this.basePath ) :
-        this.fileSystem.getPath( this.volumePath, this.basePath, path ) )
+    Path filePath = ( path == null
+      ? this.fileSystem.getPath( this.volumePath, this.basePath )
+      : this.fileSystem.getPath( this.volumePath, this.basePath, path ) )
       .toAbsolutePath();
     // TODO: check if path is not above <volumePath>/<basePath>
     return filePath.toFile();

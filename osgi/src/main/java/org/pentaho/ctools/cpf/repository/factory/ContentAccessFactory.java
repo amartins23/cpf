@@ -24,7 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.pentaho.ctools.cpf.repository.bundle.IBundleReadAccess;
 import org.pentaho.ctools.cpf.repository.bundle.ReadAccessProxy;
 import org.pentaho.ctools.cpf.repository.bundle.UserContentAccess;
-import org.pentaho.ctools.cpf.repository.utils.*;
+import org.pentaho.ctools.cpf.repository.utils.FileSystemRWAccess;
+import org.pentaho.ctools.cpf.repository.utils.OverlayRWAccess;
+import org.pentaho.ctools.cpf.repository.utils.OverlayUserContentAccess;
 import pt.webdetails.cpf.api.IContentAccessFactoryExtended;
 import pt.webdetails.cpf.api.IUserContentAccessExtended;
 import pt.webdetails.cpf.repository.api.IReadAccess;
@@ -76,7 +78,9 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
     }
   }
   public void removeReadAccess( IBundleReadAccess readAccess ) {
-    if ( readAccess == null ) return;
+    if ( readAccess == null ) {
+      return;
+    }
     if ( readAccess.isUserContent() ) {
       this.userContentReadAccesses.remove( readAccess );
     } else {
@@ -110,7 +114,7 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
       if ( userContentReadAccesses.isEmpty() ) {
         return userContentAccess;
       } else {
-        return new OverlayUserContentAccess(basePath, userContentAccess, userContentReadAccesses);
+        return new OverlayUserContentAccess( basePath, userContentAccess, userContentReadAccesses );
       }
     }
   }

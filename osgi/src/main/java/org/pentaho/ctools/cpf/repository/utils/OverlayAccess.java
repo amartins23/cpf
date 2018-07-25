@@ -33,7 +33,7 @@ public abstract class OverlayAccess<T extends IRWAccess> implements IRWAccess {
   private final String basePath;
   protected static final Log logger = LogFactory.getLog( OverlayAccess.class );
 
-  public OverlayAccess(String basePath, T writeAccess, List<IReadAccess> readAccessList ) {
+  public OverlayAccess( String basePath, T writeAccess, List<IReadAccess> readAccessList ) {
     if ( writeAccess == null ) {
       throw new IllegalArgumentException( "writeAccess cannot be null" );
     }
@@ -65,7 +65,7 @@ public abstract class OverlayAccess<T extends IRWAccess> implements IRWAccess {
    * @param lastModified
    * @return
    */
-  private IBasicFileExt extendBasicFile(IBasicFile basicFile, LongSupplier lastModified ) {
+  private IBasicFileExt extendBasicFile( IBasicFile basicFile, LongSupplier lastModified ) {
     return new IBasicFileExt() {
       @Override
       public long getLastModified() {
@@ -160,7 +160,7 @@ public abstract class OverlayAccess<T extends IRWAccess> implements IRWAccess {
   }
 
   @Override
-  public List<IBasicFile> listFiles(String path, IBasicFileFilter filter, int maxDepth, boolean includeDirs, boolean showHiddenFilesAndFolders ) {
+  public List<IBasicFile> listFiles( String path, IBasicFileFilter filter, int maxDepth, boolean includeDirs, boolean showHiddenFilesAndFolders ) {
     ArrayList<IBasicFile> result = new ArrayList<>();
     String fullPath = buildPath( path );
 

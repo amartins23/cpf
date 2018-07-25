@@ -27,7 +27,7 @@ import java.util.List;
  */
 public final class OverlayRWAccess extends OverlayAccess<IRWAccess> {
 
-  public OverlayRWAccess(String basePath, IRWAccess writeAccess, List<IReadAccess> readAccessList ) {
+  public OverlayRWAccess( String basePath, IRWAccess writeAccess, List<IReadAccess> readAccessList ) {
     super( basePath, writeAccess, readAccessList );
   }
 }

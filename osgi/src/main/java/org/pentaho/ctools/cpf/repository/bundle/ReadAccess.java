@@ -108,7 +108,7 @@ public final class ReadAccess implements IBundleReadAccess {
 
   private boolean filterBundleFolders( URL url ) {
     final String path = url.getPath();
-    return !( path.endsWith( "/META-INF/") || path.endsWith( "/OSGI-INF/") );
+    return !( path.endsWith( "/META-INF/" ) || path.endsWith( "/OSGI-INF/" ) );
   }
 
   private List<IBasicFile> listFiles( String path, IBasicFileFilter filter, boolean recursive ) {
