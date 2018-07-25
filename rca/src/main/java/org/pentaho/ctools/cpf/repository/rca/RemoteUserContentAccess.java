@@ -43,7 +43,6 @@ public class RemoteUserContentAccess extends RemoteReadWriteAccess implements IU
 
   @Override
   public boolean saveFile( IFileContent file ) {
-    //TODO: dummy implementation
     try {
       if ( saveFile( file.getPath(), file.getContents() ) )
       {

@@ -17,11 +17,12 @@ import java.nio.file.FileSystems;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pentaho.ctools.cpf.repository.bundle.IBundleReadAccess;
 import org.pentaho.ctools.cpf.repository.bundle.ReadAccessProxy;
 import org.pentaho.ctools.cpf.repository.bundle.UserContentAccess;
 import org.pentaho.ctools.cpf.repository.utils.FileSystemRWAccess;
@@ -49,42 +50,71 @@ import pt.webdetails.cpf.repository.api.IRWAccess;
  *
  * @see IContentAccessFactoryExtended
  * @see IUserContentAccessExtended
- * @see IBundleReadAccess
+ * @see IReadAccess
  * @see IRWAccess
  */
 public final class ContentAccessFactory implements IContentAccessFactoryExtended {
   private static final Log logger = LogFactory.getLog( ContentAccessFactory.class );
+  private static final String SERVICE_PROPERTY_PLUGIN_ID = "pluginId";
   private static final String PLUGIN_REPOS_NAMESPACE = "repos";
   private static final String PLUGIN_SYSTEM_NAMESPACE = "system";
-  private List<IReadAccess> readAccesses = new ArrayList<>();
+  private Map<String, List<IReadAccess>> pluginReadAccessMap = new HashMap<>();
   private List<IReadAccess> userContentReadAccesses = new ArrayList<>();
   private IUserContentAccessExtended userContentAccess = null;
   private final String volumePath;
   private final String parentPluginId;
-  private final FileSystem storageFilesystem = FileSystems.getDefault();
+  private FileSystem storageFilesystem = FileSystems.getDefault();
 
-  public void addReadAccess( IReadAccess readAccess ) {
-    this.readAccesses.add( readAccess );
-  }
-  public void removeReadAccess( IReadAccess readAccess ) {
-    this.readAccesses.remove( readAccess );
+  /**
+   * Add new read-only content to the plugin system namespace.
+   * @param pluginId identifier of the plugin
+   * @param readAccess instance of read access to the plugin resources
+   */
+  public void addPluginSystemAccess( String pluginId, IReadAccess readAccess ) {
+    List<IReadAccess> pluginList = getPluginSystemAccessList( pluginId );
+    pluginList.add( readAccess );
   }
 
-  public void addReadAccess( IBundleReadAccess readAccess ) {
-    if ( readAccess.isUserContent() ) {
-      this.userContentReadAccesses.add( readAccess );
+  private List<IReadAccess> getPluginSystemAccessList( String pluginId ) {
+    List<IReadAccess> pluginList;
+
+    if ( !this.pluginReadAccessMap.containsKey( pluginId ) ) {
+      pluginList = new ArrayList<>();
+      this.pluginReadAccessMap.put( pluginId, pluginList );
     } else {
-      this.readAccesses.add( readAccess );
+      pluginList = this.pluginReadAccessMap.get( pluginId );
+    }
+
+    return pluginList;
+  }
+
+  /**
+   * Remove read-only content to the plugin system namespace.
+   * @param pluginId identifier of the plugin
+   * @param readAccess instance of read access to the plugin resources
+   */
+  public void removePluginSystemAccess( String pluginId, IReadAccess readAccess ) {
+    List<IReadAccess> pluginList = this.pluginReadAccessMap.get( pluginId );
+    if ( pluginList != null ) {
+      pluginList.remove( readAccess );
     }
   }
-  public void removeReadAccess( IBundleReadAccess readAccess ) {
-    if ( readAccess == null ) {
-      return;
+
+  public void addReadAccess( IReadAccess readAccess, Map serviceProperties ) {
+    if ( !serviceProperties.isEmpty() ) {
+      Object id = serviceProperties.get( SERVICE_PROPERTY_PLUGIN_ID );
+      if ( id != null && id instanceof String ) {
+        addPluginSystemAccess( (String) id, readAccess );
+      }
     }
-    if ( readAccess.isUserContent() ) {
-      this.userContentReadAccesses.remove( readAccess );
-    } else {
-      this.readAccesses.remove( readAccess );
+  }
+
+  public void removeReadAccess( IReadAccess readAccess, Map serviceProperties ) {
+    if ( !serviceProperties.isEmpty() ) {
+      Object id = serviceProperties.get( SERVICE_PROPERTY_PLUGIN_ID );
+      if ( id != null && id instanceof String ) {
+        removePluginSystemAccess( (String) id, readAccess );
+      }
     }
   }
 
@@ -109,7 +139,7 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
   @Override
   public IUserContentAccessExtended getUserContentAccess( String basePath ) {
     if ( userContentAccess == null ) {
-      return new UserContentAccess( new ReadAccessProxy( readAccesses, basePath ) );
+      return new UserContentAccess( new ReadAccessProxy( userContentReadAccesses, basePath ) );
     } else {
       if ( userContentReadAccesses.isEmpty() ) {
         return userContentAccess;
@@ -162,8 +192,8 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
   private IRWAccess getPluginSystemOverlay( String pluginId, String basePath ) {
     // combine read-write via filesystem storage with bundle supplied read-only assets
     String storagePath = createStoragePath( PLUGIN_SYSTEM_NAMESPACE, pluginId );
-    IRWAccess fileSystemWriter = new FileSystemRWAccess( FileSystems.getDefault(), storagePath, null );
-    return new OverlayRWAccess( basePath, fileSystemWriter, readAccesses );
+    IRWAccess fileSystemWriter = new FileSystemRWAccess( storageFilesystem, storagePath, null );
+    return new OverlayRWAccess( basePath, fileSystemWriter, getPluginSystemAccessList( pluginId ) );
   }
 
   private String createStoragePath( String namespace ) {
@@ -181,5 +211,13 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
       storage.mkdirs();
     }
     return storagePath.toString();
+  }
+
+  public FileSystem getPluginStorageFilesystem() {
+    return storageFilesystem;
+  }
+
+  public void setPluginStorageFilesystem( FileSystem storageFilesystem ) {
+    this.storageFilesystem = storageFilesystem;
   }
 }
