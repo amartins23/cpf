@@ -14,12 +14,12 @@ package org.pentaho.ctools.cpf.repository.bundle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import pt.webdetails.cpf.api.IFileContent;
+import pt.webdetails.cpf.api.IUserContentAccessExtended;
 import pt.webdetails.cpf.repository.api.FileAccess;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 import pt.webdetails.cpf.repository.api.IBasicFileFilter;
 import pt.webdetails.cpf.repository.api.IReadAccess;
-import pt.webdetails.cpf.repository.api.IRWAccess;
-import pt.webdetails.cpf.repository.api.IUserContentAccess;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,65 +27,47 @@ import java.util.List;
 
 /**
  * Allows users to access the content of the available bundle resources in an OSGi environment (or other providers).
- * Write operations are supported only if a {@code IRWAccess} is supplied.
  *
- * Note: There are no permission distinctions between different users.
+ * Note: There are no permission distinctions between different users and no write capabilities.
  *
- * @see IUserContentAccess
+ * @see IUserContentAccessExtended
  */
-public final class UserContentAccess implements IUserContentAccess {
+public final class UserContentAccess implements IUserContentAccessExtended {
   private static final Log logger = LogFactory.getLog( UserContentAccess.class );
   private IReadAccess readAccess;
-  private IRWAccess readWriteAccess;
 
-  public UserContentAccess( IReadAccess readAccess, IRWAccess readWriteAccess ) {
+  public UserContentAccess( IReadAccess readAccess ) {
     this.readAccess = readAccess;
-    this.readWriteAccess = readWriteAccess;
   }
 
   @Override
   public boolean saveFile( String path, InputStream contents ) {
-    if ( readWriteAccess == null ) {
-      logger.fatal( "Not implemented for the OSGi environment" );
-      return false;
-    }
-    return readWriteAccess.saveFile( path, contents );
+    logger.fatal( "Not implemented for the OSGi environment" );
+    return false;
   }
 
   @Override
   public boolean copyFile( String pathFrom, String pathTo ) {
-    if ( readWriteAccess == null ) {
-      logger.fatal( "Not implemented for the OSGi environment" );
-      return false;
-    }
-    return readWriteAccess.copyFile( pathFrom, pathTo );
+    logger.fatal( "Not implemented for the OSGi environment" );
+    return false;
   }
 
   @Override
   public boolean deleteFile( String path ) {
-    if ( readWriteAccess == null ) {
-      logger.fatal( "Not implemented for the OSGi environment" );
-      return false;
-    }
-    return readWriteAccess.deleteFile( path );
+    logger.fatal( "Not implemented for the OSGi environment" );
+    return false;
   }
 
   @Override
   public boolean createFolder( String path ) {
-    if ( readWriteAccess == null ) {
-      logger.fatal( "Not implemented for the OSGi environment" );
-      return false;
-    }
-    return readWriteAccess.createFolder( path );
+    logger.fatal( "Not implemented for the OSGi environment" );
+    return false;
   }
 
   @Override
   public boolean createFolder( String path, boolean isHidden ) {
-    if ( readWriteAccess == null ) {
-      logger.fatal( "Not implemented for the OSGi environment" );
-      return false;
-    }
-    return readWriteAccess.createFolder( path, isHidden );
+    logger.fatal( "Not implemented for the OSGi environment" );
+    return false;
   }
 
   @Override
@@ -131,5 +113,11 @@ public final class UserContentAccess implements IUserContentAccess {
   @Override
   public IBasicFile fetchFile( String path ) {
     return this.readAccess.fetchFile( path );
+  }
+
+  @Override
+  public boolean saveFile( IFileContent file ) {
+    logger.fatal( "Not implemented for the OSGi environment" );
+    return false;
   }
 }

@@ -22,6 +22,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.ctools.cpf.repository.bundle.IBundleReadAccess;
+import org.pentaho.ctools.cpf.repository.bundle.ReadAccessProxy;
+import org.pentaho.ctools.cpf.repository.bundle.UserContentAccess;
 import org.pentaho.ctools.cpf.repository.utils.*;
 import pt.webdetails.cpf.api.IContentAccessFactoryExtended;
 import pt.webdetails.cpf.api.IUserContentAccessExtended;
@@ -102,10 +104,14 @@ public final class ContentAccessFactory implements IContentAccessFactoryExtended
 
   @Override
   public IUserContentAccessExtended getUserContentAccess( String basePath ) {
-    if ( userContentReadAccesses.isEmpty() ) {
-      return userContentAccess;
+    if ( userContentAccess == null ) {
+      return new UserContentAccess( new ReadAccessProxy( readAccesses, basePath ) );
     } else {
-      return new OverlayUserContentAccess( basePath, userContentAccess, userContentReadAccesses );
+      if ( userContentReadAccesses.isEmpty() ) {
+        return userContentAccess;
+      } else {
+        return new OverlayUserContentAccess(basePath, userContentAccess, userContentReadAccesses);
+      }
     }
   }
 
