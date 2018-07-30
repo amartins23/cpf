@@ -44,9 +44,12 @@ public class RemoteUserContentAccess extends RemoteReadWriteAccess implements IU
   @Override
   public boolean saveFile( IFileContent file ) {
     try {
-      if ( saveFile( file.getPath(), file.getContents() ) )
-      {
-        return updateProperties( file );
+      if ( saveFile( file.getPath(), file.getContents() ) ) {
+        if ( file.isHidden() ) {
+          return makeHidden( file.getPath() ) && updateProperties( file );
+        } else {
+          return updateProperties( file );
+        }
       }
     } catch ( IOException ex ) {
       logger.error( ex );
@@ -66,7 +69,7 @@ public class RemoteUserContentAccess extends RemoteReadWriteAccess implements IU
 
     String requestURL = createRequestURL( "/api/repo/files/", file.getPath(), "localeProperties" );
     Response response = client.target( requestURL )
-      .queryParam( "locale", defaultLocale)
+      .queryParam( "locale", defaultLocale )
       .request( MediaType.APPLICATION_XML )
       .put( Entity.xml( entity ) );
 

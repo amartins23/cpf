@@ -126,28 +126,32 @@ public class RemoteReadWriteAccess extends RemoteReadAccess implements IRWAccess
       if ( isHidden ) {
         //NOTE: We only set the hidden flag on the last path component, while the "pentaho" implementation will
         //      set the hidden flag on all intermediate folders that were created.
-        StringKeyStringValueDto hiddenMeta = new StringKeyStringValueDto();
-        hiddenMeta.setKey( "_PERM_HIDDEN" );
-        hiddenMeta.setValue( "true" );
-
-        List<StringKeyStringValueDto> metadata = new ArrayList<>();
-        metadata.add( hiddenMeta );
-
-        String requestURL = createRequestURL( path, "metadata" );
-        GenericEntity<List<StringKeyStringValueDto>> entity = new GenericEntity<List<StringKeyStringValueDto>>( metadata )
-        {
-        };
-        Response response = client.target( requestURL )
-            .request( MediaType.APPLICATION_XML )
-            .put( Entity.xml( entity ) );
-
-        // TODO: handle non-OK status codes? log? exceptions?
-        // TODO: revert directory creation???
-        return response.getStatus() == Response.Status.OK.getStatusCode();
+        // TODO: revert directory creation on error???
+        return makeHidden( path );
       }
       return true;
     }
     return false;
+  }
+
+  protected boolean makeHidden( String path ) {
+    StringKeyStringValueDto hiddenMeta = new StringKeyStringValueDto();
+    hiddenMeta.setKey( "_PERM_HIDDEN" );
+    hiddenMeta.setValue( "true" );
+
+    List<StringKeyStringValueDto> metadata = new ArrayList<>();
+    metadata.add( hiddenMeta );
+
+    String requestURL = createRequestURL( path, "metadata" );
+    GenericEntity<List<StringKeyStringValueDto>> entity = new GenericEntity<List<StringKeyStringValueDto>>( metadata )
+    {
+    };
+    Response response = client.target( requestURL )
+      .request( MediaType.APPLICATION_XML )
+      .put( Entity.xml( entity ) );
+
+    // TODO: handle non-OK status codes? log? exceptions?
+    return response.getStatus() == Response.Status.OK.getStatusCode();
   }
 
   String remoteFileId( String path ) {
