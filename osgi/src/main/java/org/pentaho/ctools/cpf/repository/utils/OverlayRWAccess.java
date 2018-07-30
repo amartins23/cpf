@@ -30,4 +30,14 @@ public final class OverlayRWAccess extends OverlayAccess<IRWAccess> {
   public OverlayRWAccess( String basePath, IRWAccess writeAccess, List<IReadAccess> readAccessList ) {
     super( basePath, writeAccess, readAccessList );
   }
+
+  @Override
+  protected IBasicFileExt obtainReadAccess( String path ) {
+    IBasicFileExt result = super.obtainReadAccess( path );
+    if ( result == null && path.startsWith( "/system/" ) ) {
+      // see: cpf\pentaho\src\main\java\pt\webdetails\cpf\repository\pentaho\SystemPluginResourceAccess.java
+      logger.error( "Use of '/system/<pluginid>/' as a special prefix for accessing content from other plugins is not supported. Use the appropriate call from IContentAccessFactory." );
+    }
+    return result;
+  }
 }
